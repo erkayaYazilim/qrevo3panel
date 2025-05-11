@@ -4,32 +4,22 @@
   <meta charset="UTF-8">
   <title>QR Kod Oluşturucu</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- QRCodeStyling kütüphanesi (daha fazla stil seçeneği sunar) -->
+  <!-- QRCodeStyling kütüphanesi -->
   <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 20px;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 20px; }
+    h1 { text-align: center; margin-bottom: 20px; }
     .input-container {
       max-width: 600px;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 20px;
       padding: 20px;
-      background-color: #fff;
+      background: #fff;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: center;
     }
-    .input-container label {
-      display: block;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
+    .input-container label { display: block; margin-bottom: 10px; font-size: 16px; }
+    .input-container select,
     .input-container input {
       width: 80%;
       padding: 8px;
@@ -38,135 +28,156 @@
     }
     .input-container button {
       padding: 10px 20px;
-      background-color: #007bff;
+      background: #007bff;
       border: none;
       border-radius: 4px;
       color: #fff;
       font-size: 16px;
       cursor: pointer;
     }
-    .input-container button:hover {
-      background-color: #0056b3;
-    }
-    .qr-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
+    .input-container button:hover { background: #0056b3; }
+
+    .qr-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+    .qr-section { width: 100%; text-align: center; margin-top: 20px; }
+    .qr-section h2 { font-size: 18px; margin-bottom: 10px; }
+
     .qr-item {
-      background-color: #fff;
+      background: #fff;
       padding: 15px;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: center;
       width: 220px;
     }
-    /* Ekranda gösterimi 150x150 yapıyoruz; indirme için 300x300 üretiyoruz. */
-    .qr-item .qr-display {
+    .qr-display {
       width: 150px;
       height: 150px;
       margin: 0 auto;
       overflow: hidden;
     }
-    .qr-item p {
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    .qr-item p { margin-top: 10px; font-weight: bold; }
     .qr-item button {
       margin-top: 10px;
       padding: 8px 16px;
-      background-color: #28a745;
+      background: #28a745;
       border: none;
       border-radius: 4px;
       color: #fff;
       font-size: 14px;
       cursor: pointer;
     }
-    .qr-item button:hover {
-      background-color: #218838;
-    }
+    .qr-item button:hover { background: #218838; }
   </style>
 </head>
 <body>
   <h1>QR Kod Oluşturucu</h1>
-  
   <div class="input-container">
-    <label for="startNumber">Başlangıç Masa Numarası:</label>
-    <input type="number" id="startNumber" placeholder="Örneğin: 1" min="1">
-    
-    <label for="totalCount">Toplam Masa Sayısı:</label>
-    <input type="number" id="totalCount" placeholder="Örneğin: 10" min="1">
-    
+    <label for="firmSelect">Firma Seçin:</label>
+    <select id="firmSelect">
+      <option value="1">1. Firma</option>
+      <option value="2">2. Firma</option>
+    </select>
+
+    <label for="bahceCount">Bahçe Masa Sayısı:</label>
+    <input type="number" id="bahceCount" placeholder="Örneğin: 5" min="0">
+
+    <label for="iceriCount">İçeri Masa Sayısı:</label>
+    <input type="number" id="iceriCount" placeholder="Örneğin: 10" min="0">
+
     <br>
     <button onclick="generateQRCodes()">QR Kodlarını Oluştur</button>
   </div>
-  
+
   <div class="qr-container" id="qrContainer"></div>
-  
+
   <script>
     function generateQRCodes() {
       const container = document.getElementById("qrContainer");
-      container.innerHTML = ""; // Önceki QR kodları temizle
-      
-      const startNumber = parseInt(document.getElementById("startNumber").value);
-      const totalCount = parseInt(document.getElementById("totalCount").value);
-      
-      if (isNaN(startNumber) || isNaN(totalCount) || totalCount < 1) {
-        alert("Lütfen geçerli bir başlangıç numarası ve toplam masa sayısı giriniz.");
+      container.innerHTML = "";
+
+      const firmSelect = document.getElementById("firmSelect").value;
+      const bahceCount = parseInt(document.getElementById("bahceCount").value) || 0;
+      const iceriCount = parseInt(document.getElementById("iceriCount").value) || 0;
+
+      if (bahceCount < 1 && iceriCount < 1) {
+        alert("Lütfen en az bir Bahçe veya İçeri masa sayısı giriniz.");
         return;
       }
-      
-      // Her masa numarası için (başlangıçtan başlayarak toplam masa sayısı kadar) QR kod oluştur
-      for (let i = startNumber; i < startNumber + totalCount; i++) {
-        // Masa numarası parametresini ekleyelim
-        const baseURL = "https://erkayayazilim.github.io/wrdenemasea/";
-        const urlWithParam = baseURL + "?masa=" + encodeURIComponent(i);
-        
-        // QR kod kapsayıcı eleman
-        const qrItemDiv = document.createElement("div");
-        qrItemDiv.className = "qr-item";
-        
-        // Görüntü için ayrı bir div oluşturup CSS ile 150x150 olarak ölçeklendirelim
-        const qrDisplayDiv = document.createElement("div");
-        qrDisplayDiv.className = "qr-display";
-        
-        // Yüksek çözünürlüklü QR kod oluşturuyoruz (300x300) – indirme kalitesi artar.
-        const qrCode = new QRCodeStyling({
-          width: 300,
-          height: 300,
-          data: urlWithParam,
-          margin: 5,
-          dotsOptions: {
-            color: "#000000",
-            type: "rounded"  // Yuvarlatılmış noktalar, kareli görünümü azaltır.
-          },
-          backgroundOptions: {
-            color: "#ffffff"
-          }
-        });
-        
-        // QR kodu, hem görüntü hem de indirme için qrDisplayDiv içerisine ekliyoruz.
-        qrCode.append(qrDisplayDiv);
-        
-        // Masa numarası etiketini oluştur
-        const label = document.createElement("p");
-        label.textContent = "Masa " + i;
-        
-        // İndirme butonu oluştur
-        const downloadBtn = document.createElement("button");
-        downloadBtn.textContent = "İndir";
-        downloadBtn.onclick = function() {
-          // QR kodu yüksek çözünürlüklü olarak indirir (300x300)
-          qrCode.download({ name: "Masa-" + i + ".png", extension: "png" });
-        };
-        
-        // Elemanları sırayla ekle
-        qrItemDiv.appendChild(qrDisplayDiv);
-        qrItemDiv.appendChild(label);
-        qrItemDiv.appendChild(downloadBtn);
-        container.appendChild(qrItemDiv);
+
+      // Firma URL'sini seçime göre belirle
+      let baseURL = "";
+      let firmaAdi = "";
+      if (firmSelect === "1") {
+        baseURL = "https://qrmenu1.sinanustasariyerborekcisi.com/";
+        firmaAdi = "1.Firma";
+      } else {
+        baseURL = "https://qrmenu2.sinanustasariyerborekcisi.com/";
+        firmaAdi = "2.Firma";
       }
+
+      // Bahçe QR kodları
+      if (bahceCount > 0) {
+        const bahceSection = document.createElement("div");
+        bahceSection.className = "qr-section";
+        bahceSection.innerHTML = "<h2>Bahçe Masaları</h2>";
+        container.appendChild(bahceSection);
+
+        for (let i = 1; i <= bahceCount; i++) {
+          addQRCode(container, baseURL, firmaAdi, "bahce", i);
+        }
+      }
+
+      // İçeri QR kodları
+      if (iceriCount > 0) {
+        const iceriSection = document.createElement("div");
+        iceriSection.className = "qr-section";
+        iceriSection.innerHTML = "<h2>İçeri Masaları</h2>";
+        container.appendChild(iceriSection);
+
+        for (let i = 1; i <= iceriCount; i++) {
+          addQRCode(container, baseURL, firmaAdi, "iceri", i);
+        }
+      }
+    }
+
+    function addQRCode(container, baseURL, firmaAdi, area, number) {
+      const urlWithParam = `${baseURL}?area=${area}&masa=${encodeURIComponent(number)}`;
+      const qrItemDiv = document.createElement("div");
+      qrItemDiv.className = "qr-item";
+
+      const qrDisplayDiv = document.createElement("div");
+      qrDisplayDiv.className = "qr-display";
+
+      const qrCode = new QRCodeStyling({
+        width: 300,
+        height: 300,
+        data: urlWithParam,
+        margin: 5,
+        dotsOptions: {
+          color: "#000",
+          type: "rounded"
+        },
+        backgroundOptions: {
+          color: "#fff"
+        }
+      });
+
+      qrCode.append(qrDisplayDiv);
+
+      const label = document.createElement("p");
+      label.textContent = `${area === "bahce" ? "Bahçe" : "İçeri"} Masa ${number}`;
+
+      const downloadBtn = document.createElement("button");
+      downloadBtn.textContent = "İndir";
+      downloadBtn.onclick = () => {
+        const fileName = `${firmaAdi}-${area === "bahce" ? "Bahce" : "Iceri"}-Masa-${number}.png`;
+        qrCode.download({ name: fileName, extension: "png" });
+      };
+
+      qrItemDiv.appendChild(qrDisplayDiv);
+      qrItemDiv.appendChild(label);
+      qrItemDiv.appendChild(downloadBtn);
+      container.appendChild(qrItemDiv);
     }
   </script>
 </body>
