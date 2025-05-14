@@ -81,8 +81,11 @@
     <label for="bahceCount">Bahçe Masa Sayısı:</label>
     <input type="number" id="bahceCount" placeholder="Örneğin: 5" min="0">
 
-    <label for="iceriCount">İçeri Masa Sayısı:</label>
-    <input type="number" id="iceriCount" placeholder="Örneğin: 10" min="0">
+    <label for="salonCount">Salon Masa Sayısı:</label>
+    <input type="number" id="salonCount" placeholder="Örneğin: 8" min="0">
+
+    <label for="terasCount">Teras Masa Sayısı:</label>
+    <input type="number" id="terasCount" placeholder="Örneğin: 3" min="0">
 
     <br>
     <button onclick="generateQRCodes()">QR Kodlarını Oluştur</button>
@@ -97,14 +100,14 @@
 
       const firmSelect = document.getElementById("firmSelect").value;
       const bahceCount = parseInt(document.getElementById("bahceCount").value) || 0;
-      const iceriCount = parseInt(document.getElementById("iceriCount").value) || 0;
+      const salonCount = parseInt(document.getElementById("salonCount").value) || 0;
+      const terasCount = parseInt(document.getElementById("terasCount").value) || 0;
 
-      if (bahceCount < 1 && iceriCount < 1) {
-        alert("Lütfen en az bir Bahçe veya İçeri masa sayısı giriniz.");
+      if (bahceCount < 1 && salonCount < 1 && terasCount < 1) {
+        alert("Lütfen en az bir Bahçe, Salon veya Teras masa sayısı giriniz.");
         return;
       }
 
-      // Firma URL'sini seçime göre belirle
       let baseURL = "";
       let firmaAdi = "";
       if (firmSelect === "1") {
@@ -115,27 +118,33 @@
         firmaAdi = "2.Firma";
       }
 
-      // Bahçe QR kodları
       if (bahceCount > 0) {
         const bahceSection = document.createElement("div");
         bahceSection.className = "qr-section";
         bahceSection.innerHTML = "<h2>Bahçe Masaları</h2>";
         container.appendChild(bahceSection);
-
         for (let i = 1; i <= bahceCount; i++) {
           addQRCode(container, baseURL, firmaAdi, "bahce", i);
         }
       }
 
-      // İçeri QR kodları
-      if (iceriCount > 0) {
-        const iceriSection = document.createElement("div");
-        iceriSection.className = "qr-section";
-        iceriSection.innerHTML = "<h2>İçeri Masaları</h2>";
-        container.appendChild(iceriSection);
+      if (salonCount > 0) {
+        const salonSection = document.createElement("div");
+        salonSection.className = "qr-section";
+        salonSection.innerHTML = "<h2>Salon Masaları</h2>";
+        container.appendChild(salonSection);
+        for (let i = 1; i <= salonCount; i++) {
+          addQRCode(container, baseURL, firmaAdi, "salon", i);
+        }
+      }
 
-        for (let i = 1; i <= iceriCount; i++) {
-          addQRCode(container, baseURL, firmaAdi, "iceri", i);
+      if (terasCount > 0) {
+        const terasSection = document.createElement("div");
+        terasSection.className = "qr-section";
+        terasSection.innerHTML = "<h2>Teras Masaları</h2>";
+        container.appendChild(terasSection);
+        for (let i = 1; i <= terasCount; i++) {
+          addQRCode(container, baseURL, firmaAdi, "teras", i);
         }
       }
     }
@@ -161,16 +170,15 @@
           color: "#fff"
         }
       });
-
       qrCode.append(qrDisplayDiv);
 
       const label = document.createElement("p");
-      label.textContent = `${area === "bahce" ? "Bahçe" : "İçeri"} Masa ${number}`;
+      label.textContent = `${area === "bahce" ? "Bahçe" : area === "salon" ? "Salon" : "Teras"} Masa ${number}`;
 
       const downloadBtn = document.createElement("button");
       downloadBtn.textContent = "İndir";
       downloadBtn.onclick = () => {
-        const fileName = `${firmaAdi}-${area === "bahce" ? "Bahce" : "Iceri"}-Masa-${number}.png`;
+        const fileName = `${firmaAdi}-${area === "bahce" ? "Bahce" : area === "salon" ? "Salon" : "Teras"}-Masa-${number}.png`;
         qrCode.download({ name: fileName, extension: "png" });
       };
 
